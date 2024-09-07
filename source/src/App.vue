@@ -1,7 +1,7 @@
 <template>
 
   <v-container fluid>
-    <h2>角材間距計算機v1.1</h2>
+    <h2>角材間距計算機</h2>
     <v-sheet style="border: 2px solid #cccccc;border-radius: 8px;padding: 10px;background-color: beige;">
       <v-row>
         <v-col>
@@ -22,32 +22,44 @@
         </v-col>
       </v-row>
 
-      <v-row>
+      <v-row class="manual-button" v-show="calcType!=='D'">
         <v-col>
-          <v-text-field label="角材數量" color="blue" clearable type="number" v-model.number="squareNumber"
-            hide-details density="compact"></v-text-field>
-          <div style="margin-top: 10px;"></div>
+          <v-checkbox label="角材自行加總(需要絕對精準時)" density="compact" v-model="isManual" color="green"
+            hide-details></v-checkbox>
         </v-col>
+      </v-row>
+
+      <v-row v-show="calcType!=='D'">
+        <v-col>
+          <v-text-field v-if="isManual" :label="!isManual ? '角材寬度(mm)' : '角材總寬(mm)'" clearable type="number"
+            :style="{ color: isManual ? 'green' : 'black' }" v-model.number="squareWidth" hide-details
+            density="compact"></v-text-field>
+          <v-combobox v-else label="角材寬度(mm)" density="compact" color="blue" clearable hide-details :items="squareTypes"
+            v-model.number="squareWidth" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
+
+          <div v-if="isManual" class="t-rules"> {{ (Math.round(this._squareWidth / 10 / 3.03 * 1000) / 1000) + ' 寸' }}
+          </div>
+          <div v-else class="t-rules">表列為市售尺寸。扣掉鋸路後剩 {{ (Math.round(this._squareWidth / 10 / 3.03 * 1000) / 1000) + ' 寸'
+            }}</div>
+        </v-col>
+
       </v-row>
       <v-row>
         <v-col>
-          <v-text-field :label="!isManual ? '角材寬度(mm)' : '角材總寬(mm)'" clearable type="number"
-            v-model.number="squareWidth" hide-details density="compact"></v-text-field>
+          <v-combobox label="角材數量" density="compact" color="blue" clearable hide-details :items="squareNumbers"
+            v-model.number="squareNumber" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
         </v-col>
-        <v-col> <v-checkbox label="角材自行加總" v-model="isManual" color="red" hide-details></v-checkbox>
-        </v-col>
-
       </v-row>
 
       <v-row>
         <v-col>
           <v-text-field label="間隔數量" type="number" v-model="spacing" readonly bg-color="#eeeeee" hide-details
-            density="compact" color="red"></v-text-field>
+            density="compact" base-color="blue"></v-text-field>
         </v-col>
 
         <v-col>
           <v-text-field label="角材總寬(mm)" type="number" v-model="squareTotal" readonly bg-color="#eeeeee" hide-details
-            density="compact" color="red" ></v-text-field>
+            density="compact" base-color="blue"></v-text-field>
 
           <div class="t-rules"> {{ (Math.round(this.squareTotal / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
         </v-col>
@@ -58,7 +70,7 @@
       <v-row>
         <v-col>
           <v-text-field label="間距(mm)" type="number" v-model="spacingSize" readonly bg-color="#eeeeee" hide-details
-            density="compact" color="red"></v-text-field>
+            density="compact" base-color="blue" class="result2"></v-text-field>
 
           <div class="t-rules"> {{ (Math.round(this.spacingSize / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
         </v-col>
@@ -78,7 +90,10 @@
             'c-first': this.calcType === 'C' && no === 1,
             'c-last': this.calcType === 'C' && no === spacing
           }
-            ">{{ no }}</div>
+            ">{{ no }}
+            <div v-if="no === 1" class="demoSize">{{ this.spacingSize }}</div>
+          </div>
+
         </template>
 
         <!--TYPE D-->
@@ -87,14 +102,17 @@
             'd-first': no === 1,
             'd-last': no === spacing
           }
-            ">{{ no }}</div>
+            ">{{ no }}
+
+            <div v-if="no === 1" class="demoSize">{{ this.spacingSize }}</div>
+          </div>
 
           <div style="width: 3px;border-right: 2px dashed red;" v-if="no !== spacing"></div>
         </template>
       </div>
-      (示意圖"非"正確比例，<span style="color: red;">紅色</span>虛線是劃線位置)
+      (示意圖非正確比例，<span style="color: red;">紅色</span>虛線是劃線位置)
     </div>
-
+    <div style="text-align: center;font-size: 0.8em;color: #cccccc;padding-top: 20px;">版本:v1.1 最後更新日期: 2024/09/08</div>
   </v-container>
 </template>
 
@@ -112,6 +130,7 @@ export default {
       demoWidth: -1,
       demoSquareWidth: 10,
 
+      //板材
       totalWidthData: [
         { title: '8尺(2440mm)', value: 2440 },
         { title: '7尺(2135mm)', value: 2135 },
@@ -119,12 +138,24 @@ export default {
         { title: '4尺(1220mm)', value: 1220 },
         { title: '3尺(915mm)', value: 915 },
         { title: '2尺(610mm)', value: 610 }],
+
       calcType: "A",
       calcTypes: [
         { title: "有頭尾 ┃┃┃", value: "A", desc: "計算角材到角材之間的實內距離" },
         { title: "無頭尾 ┆┃┆", value: "B", desc: "計算角材到角材之間的實內距離，頭尾端無角材" },
         { title: "有頭無尾 ┃┃┆", value: "C", desc: "計算角材到角材之間的實內距離，尾端沒有角材" },
-        { title: "循環計算 ┃┃┃...", value: "D", desc: "計算板材連續拼接的固定距離(頭尾的間距會不同)" }]
+        { title: "循環計算 ┃┃┃...", value: "D", desc: "計算板材連續拼接的固定距離(頭尾的間距會不同)" }],
+
+      //角材
+      squareTypes: [
+        { title: '1寸(27mm)', value: 27 },
+        { title: '1.2寸(33mm)', value: 33 },
+        { title: '1.8寸(51mm)', value: 51 },
+        { title: '2寸(57mm)', value: 57 },
+        { title: '2寸(59mm)-門料', value: 59 },
+        { title: '0.6寸(18mm)-門料', value: 18 },
+      ],
+      squareNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     }
   },
   mounted() {
@@ -245,7 +276,7 @@ export default {
 
 </script>
 
-<style scoped>
+<style>
 .demoDiv {
   margin-top: 20px;
   border-left: 2px solid black;
@@ -272,6 +303,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   border-top: 1px solid black;
   border-bottom: 1px solid black;
   border-left: 2px dashed red;
@@ -287,6 +319,7 @@ export default {
   justify-content: center;
   border-top: 1px solid black;
   border-bottom: 1px solid black;
+  position: relative;
 }
 
 .a-first {
@@ -322,5 +355,24 @@ export default {
 
 .d-last {
   margin: 0 10px 0 5px;
+}
+
+.manual-button {
+  padding: 0;
+  margin-top: 0 !important;
+}
+
+.result2 input {
+  font-size: 2em !important;
+  color: blue
+}
+
+.demoSize {
+  position: absolute;
+  bottom: 10px;
+  background-color: black;
+  color: white;
+  width: 100%;
+  text-align: center;
 }
 </style>
