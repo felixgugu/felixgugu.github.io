@@ -16,9 +16,9 @@
       <v-row>
         <v-col>
 
-          <v-combobox label="總寬(mm)" density="compact" color="blue" clearable hide-details :items="totalWidthData"
+          <v-combobox label="板材總寬(mm)" density="compact" color="blue" clearable hide-details :items="totalWidthData"
             v-model.number="totalWidth" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
-          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this.totalWidth / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this._totalWidth / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
         </v-col>
       </v-row>
 
@@ -32,7 +32,7 @@
       <v-row>
         <v-col>
           <v-text-field :label="!isManual ? '角材寬度(mm)' : '角材總寬(mm)'" clearable type="number"
-            v-model.number="squareWidth" :messages="(Math.round(this.squareWidth / 10 / 3.03 * 1000) / 1000) + '寸'"
+            v-model.number="squareWidth"
             hide-details density="compact"></v-text-field>
         </v-col>
         <v-col> <v-checkbox label="角材自行加總" v-model="isManual" color="red" hide-details></v-checkbox>
@@ -68,10 +68,10 @@
     </v-sheet>
 
     <div v-if="isReady">
-      <div style="" class="demoDiv" ref="demo" :class="{'d-demoDiv': this.calcType === 'D'}">
+      <div style="" class="demoDiv" ref="demo" :class="{ 'd-demoDiv': this.calcType === 'D' }">
 
         <!--TYPE A B C-->
-        <template v-if="calcType !== 'D'" v-for="(no) in spacing" >
+        <template v-if="calcType !== 'D'" v-for="(no) in spacing">
           <div class="block" :class="{
             'a-first': this.calcType === 'A' && no === 1,
             'a-last': this.calcType === 'A' && no === spacing,
@@ -91,7 +91,7 @@
           }
             ">{{ no }}</div>
 
-            <div style="width: 3px;border-right: 2px dashed black;" v-if="no!==spacing"></div>
+          <div style="width: 3px;border-right: 2px dashed black;" v-if="no !== spacing"></div>
         </template>
       </div>
       (示意圖"非"正確比例，虛線是劃線位置)
@@ -158,16 +158,16 @@ export default {
       let n = 0
       switch (this.calcType) {
         case "A":
-          n = this.squareNumber??1 - 1
+          n = this._squareNumber ?? 1 - 1
           break;
         case "B":
-          n = this.squareNumber??1 + 1
+          n = this._squareNumber ?? 1 + 1
           break;
         case "C":
-          n = this.squareNumber??1
+          n = this._squareNumber ?? 1
           break;
         case "D":
-          n = this.squareNumber??1 - 1
+          n = this._squareNumber ?? 1 - 1
           break;
 
         default:
@@ -181,16 +181,16 @@ export default {
       let n = 0
       switch (this.calcType) {
         case "A":
-          n = (this.totalWidth - this.realSquareTotal) / this.spacing
+          n = (this._totalWidth - this.realSquareTotal) / this.spacing
           break;
         case "B":
-          n = (this.totalWidth - this.realSquareTotal) / this.spacing
+          n = (this._totalWidth - this.realSquareTotal) / this.spacing
           break;
         case "C":
-          n = (this.totalWidth - this.realSquareTotal) / this.spacing
+          n = (this._totalWidth - this.realSquareTotal) / this.spacing
           break;
         case "D":
-          n = this.totalWidth / this.spacing
+          n = this._totalWidth / this.spacing
           break;
 
         default:
@@ -203,27 +203,44 @@ export default {
     // 角材總寬
     squareTotal() {
       if (this.isManual) {
-        return this.squareWidth
+        return this._squareWidth
       } else {
-        return this.squareNumber??1 * this.squareWidth
+        return this._squareNumber ?? 1 * this._squareWidth
       }
     },
 
     // 實際角材總寬
     realSquareTotal() {
       if (this.isManual) {
-        return this.squareWidth
+        return this._squareWidth
       } else {
-        return this.squareWidth * this.squareNumber??1
+        return this._squareWidth * this._squareNumber ?? 1
       }
 
+    },
+
+    _squareNumber() {
+      if (typeof this.squareNumber === 'number') {
+        return this.squareNumber
+      } else {
+        return 1
+      }
+    },
+    _squareWidth(){
+      if (typeof this.squareWidth === 'number') {
+        return this.squareWidth
+      } else {
+        return 1
+      }
+    },
+    _totalWidth(){
+      if (typeof this.totalWidth === 'number') {
+        return this.totalWidth
+      } else {
+        return 1
+      }
     }
-  },
-  watch: {
-    "totalWidth": function (v) {
-      console.log("[watch] totalWidth:", v)
-      console.log(typeof this.totalWidth)
-    }
+
   }
 }
 
@@ -267,7 +284,7 @@ export default {
   background-color: white;
   flex: 1;
   margin: 0 5px;
-  display: flex!important;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   border-top: 1px solid black;
