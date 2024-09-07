@@ -158,23 +158,22 @@ export default {
       let n = 0
       switch (this.calcType) {
         case "A":
-          n = this.squareNumber - 1
+          n = this.squareNumber??1 - 1
           break;
         case "B":
-          n = this.squareNumber + 1
+          n = this.squareNumber??1 + 1
           break;
         case "C":
-          n = this.squareNumber
+          n = this.squareNumber??1
           break;
         case "D":
-          n = this.squareNumber - 1
+          n = this.squareNumber??1 - 1
           break;
 
         default:
           break;
       }
-
-      return n//this.squareNumber - 1
+      return n
     },
     // 間隔距離
     spacingSize() {
@@ -206,7 +205,7 @@ export default {
       if (this.isManual) {
         return this.squareWidth
       } else {
-        return this.squareNumber * this.squareWidth
+        return this.squareNumber??1 * this.squareWidth
       }
     },
 
@@ -215,7 +214,7 @@ export default {
       if (this.isManual) {
         return this.squareWidth
       } else {
-        return this.squareWidth * this.squareNumber
+        return this.squareWidth * this.squareNumber??1
       }
 
     }
