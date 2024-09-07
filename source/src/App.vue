@@ -32,8 +32,7 @@
       <v-row>
         <v-col>
           <v-text-field :label="!isManual ? '角材寬度(mm)' : '角材總寬(mm)'" clearable type="number"
-            v-model.number="squareWidth"
-            hide-details density="compact"></v-text-field>
+            v-model.number="squareWidth" hide-details density="compact"></v-text-field>
         </v-col>
         <v-col> <v-checkbox label="角材自行加總" v-model="isManual" color="red" hide-details></v-checkbox>
         </v-col>
@@ -42,14 +41,13 @@
 
       <v-row>
         <v-col>
-
           <v-text-field label="間隔數量" type="number" v-model="spacing" readonly bg-color="#eeeeee" hide-details
-            density="compact"></v-text-field>
+            density="compact" color="red"></v-text-field>
         </v-col>
 
         <v-col>
           <v-text-field label="角材總寬(mm)" type="number" v-model="squareTotal" readonly bg-color="#eeeeee" hide-details
-            density="compact"></v-text-field>
+            density="compact" color="red" ></v-text-field>
 
           <div class="t-rules"> {{ (Math.round(this.squareTotal / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
         </v-col>
@@ -60,7 +58,7 @@
       <v-row>
         <v-col>
           <v-text-field label="間距(mm)" type="number" v-model="spacingSize" readonly bg-color="#eeeeee" hide-details
-            density="compact"></v-text-field>
+            density="compact" color="red"></v-text-field>
 
           <div class="t-rules"> {{ (Math.round(this.spacingSize / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
         </v-col>
@@ -91,10 +89,10 @@
           }
             ">{{ no }}</div>
 
-          <div style="width: 3px;border-right: 2px dashed black;" v-if="no !== spacing"></div>
+          <div style="width: 3px;border-right: 2px dashed red;" v-if="no !== spacing"></div>
         </template>
       </div>
-      (示意圖"非"正確比例，虛線是劃線位置)
+      (示意圖"非"正確比例，<span style="color: red;">紅色</span>虛線是劃線位置)
     </div>
 
   </v-container>
@@ -158,16 +156,16 @@ export default {
       let n = 0
       switch (this.calcType) {
         case "A":
-          n = this._squareNumber ?? 1 - 1
+          n = this._squareNumber - 1
           break;
         case "B":
-          n = this._squareNumber ?? 1 + 1
+          n = this._squareNumber + 1
           break;
         case "C":
-          n = this._squareNumber ?? 1
+          n = this._squareNumber
           break;
         case "D":
-          n = this._squareNumber ?? 1 - 1
+          n = this._squareNumber - 1
           break;
 
         default:
@@ -205,7 +203,7 @@ export default {
       if (this.isManual) {
         return this._squareWidth
       } else {
-        return this._squareNumber ?? 1 * this._squareWidth
+        return this._squareNumber * this._squareWidth
       }
     },
 
@@ -214,7 +212,7 @@ export default {
       if (this.isManual) {
         return this._squareWidth
       } else {
-        return this._squareWidth * this._squareNumber ?? 1
+        return this._squareWidth * this._squareNumber
       }
 
     },
@@ -226,14 +224,14 @@ export default {
         return 1
       }
     },
-    _squareWidth(){
+    _squareWidth() {
       if (typeof this.squareWidth === 'number') {
         return this.squareWidth
       } else {
         return 1
       }
     },
-    _totalWidth(){
+    _totalWidth() {
       if (typeof this.totalWidth === 'number') {
         return this.totalWidth
       } else {
@@ -276,8 +274,8 @@ export default {
   justify-content: center;
   border-top: 1px solid black;
   border-bottom: 1px solid black;
-  border-left: 2px dashed black;
-  border-right: 2px dashed black;
+  border-left: 2px dashed red;
+  border-right: 2px dashed red;
 }
 
 .d-block {
