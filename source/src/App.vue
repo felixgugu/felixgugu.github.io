@@ -1,114 +1,107 @@
 <template>
-  <h2>角材間距計算v1.0</h2>
+
   <v-container fluid>
-    <v-form style="border: 1px solid black">
-      <div style="background-color:beige;padding: 10px;display: flex;" class="inputs">
-        <v-text-field label="總寬(mm)" variant="outlined" clearable type="number" v-model.number="totalWidth"
-          :messages="(Math.round(this.totalWidth / 10 / 30.3 * 100) / 100) + '尺'" style="flex: 2;"></v-text-field>
+    <h2>角材間距計算機v1.1</h2>
+    <v-sheet style="border: 2px solid #cccccc;border-radius: 8px;padding: 10px;background-color: beige;">
+      <v-row>
+        <v-col>
+          <v-select label="計算方式" density="compact" clearable hide-details :items="calcTypes" v-model="calcType"
+            color="blue"></v-select>
+
+          <div class="t-rules" style="color:blue">{{ this.calcTypes.filter((v) => v.value === this.calcType)[0].desc }}
+          </div>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col>
+
+          <v-combobox label="總寬(mm)" density="compact" color="blue" clearable hide-details :items="totalWidthData"
+            v-model.number="totalWidth" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
+          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this.totalWidth / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col>
+          <v-text-field label="角材數量(包含頭尾)" color="blue" clearable type="number" v-model.number="squareNumber"
+            hide-details density="compact"></v-text-field>
+          <div style="margin-top: 10px;"></div>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-text-field :label="!isManual ? '角材寬度(mm)' : '角材總寬(mm)'" clearable type="number"
+            v-model.number="squareWidth" :messages="(Math.round(this.squareWidth / 10 / 3.03 * 1000) / 1000) + '寸'"
+            hide-details density="compact"></v-text-field>
+        </v-col>
+        <v-col> <v-checkbox label="角材自行加總" v-model="isManual" color="red" hide-details></v-checkbox>
+        </v-col>
+
+      </v-row>
+
+      <v-row>
+        <v-col>
+
+          <v-text-field label="間隔數量" type="number" v-model="spacing" readonly bg-color="#eeeeee" hide-details
+            density="compact"></v-text-field>
+        </v-col>
+
+        <v-col>
+          <v-text-field label="角材總寬(mm)" type="number" v-model="squareTotal" readonly bg-color="#eeeeee" hide-details
+            density="compact"></v-text-field>
+
+          <div class="t-rules"> {{ (Math.round(this.squareTotal / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+        </v-col>
+      </v-row>
 
 
-      </div>
-      <div style="background-color:beige;padding: 10px;display: flex;" class="inputs">
-        <v-text-field :label="!isManual ? '角材寬度(mm)' : '手動加總角材總寬度(mm)'" variant="outlined" clearable type="number"
-          v-model.number="squareWidth"
-          :messages="(Math.round(this.squareWidth / 10 / 3.03 * 1000) / 1000) + '寸'" style="flex: 1;"></v-text-field>
-      </div>
 
-      <div style="background-color:beige;padding: 10px;display: flex;" class="inputs">
-        <v-text-field label="角材數量(包含頭尾)" variant="outlined" clearable type="number" v-model.number="squareNumber"
-          :hide-details="true" style="flex: 1;"></v-text-field>
-      </div>
+      <v-row>
+        <v-col>
+          <v-text-field label="間距(mm)" type="number" v-model="spacingSize" readonly bg-color="#eeeeee" hide-details
+            density="compact"></v-text-field>
 
-      <div style="background-color:beige;padding: 0 10px;display: flex;">
-        <v-checkbox label="手動加總角材總寬度" v-model="isManual" color="red" hide-details @change="doManual"></v-checkbox>
-      </div>
-
-      <div style="background-color:beige;padding: 0 10px;display: flex;" class="inputs">
-        <v-text-field label="間隔數量" variant="outlined"  type="number" v-model="spacing" readonly
-          bg-color="#eeeeee"></v-text-field>
-        <v-text-field label="角材總寬(mm)" variant="outlined"  type="number" v-model="squareTotal" readonly
-          bg-color="#eeeeee"></v-text-field>
-
-
-      </div>
-      <div style="background-color:beige;padding: 0 10px;display: flex;" class="inputs">
-        <v-text-field label="實內間距-未包含角材(mm)" variant="outlined"  type="number" v-model="spacingSize" readonly
-          bg-color="#eeeeee" :messages="(Math.round(this.spacingSize / 10 / 30.3 * 100) / 100) + '尺'"></v-text-field>
-        <v-text-field label="循還間距-角材中心位置(mm)" variant="outlined"  type="number" v-model="cycleSize" readonly
-          bg-color="#eeeeee" :messages="(Math.round(this.cycleSize / 10 / 30.3 * 100) / 100) + '尺'"></v-text-field>
-      </div>
-    </v-form>
+          <div class="t-rules"> {{ (Math.round(this.spacingSize / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+        </v-col>
+      </v-row>
+    </v-sheet>
 
     <div v-if="isReady">
-      <br>
-      <br>
+      <div style="" class="demoDiv" ref="demo" :class="{'d-demoDiv': this.calcType === 'D'}">
 
-      <h2>間距等寬計算示意圖</h2>
-
-      <div style="width:100%; height: 250px;" class="demoDiv" ref="demo">
-        <template v-for="(no, index) in squareNumber" :key="no">
-          <div
-            style="border: 0px solid black; background-color: #cccccc;color: white; position: absolute;text-align: center;"
-            :style='{
-              "width": demoSquareWidth + "px",
-              "height": "250px",
-              "left": ((demoSpacingSize + demoSquareWidth) * (no - 1)) + "px"
-            }'>
-          </div>
-
-          <div v-if="index === 0"
-            style="position: absolute; height:250px;display: flex;align-items: center;justify-content: center;" :style='{
-              "left": ((demoSpacingSize + demoSquareWidth) * (no - 1)) + "px",
-              "width": (demoSpacingSize + demoSquareWidth) + "px"
-            }'>
-            {{ Math.round(spacingSize * 100) / 100 }}
-
-          </div>
-
-          <div
-            style="position: absolute; border-radius: 50%; width: 20px;height: 20px;color: white ;background-color: blue;display: flex;align-items: center;justify-content: center;"
-            :style='{
-              "left": ((demoSpacingSize + demoSquareWidth) * (no - 1) - 5) + "px"
-            }'>{{ no }}</div>
+        <!--TYPE A B C-->
+        <template v-if="calcType !== 'D'" v-for="(no) in spacing" >
+          <div class="block" :class="{
+            'a-first': this.calcType === 'A' && no === 1,
+            'a-last': this.calcType === 'A' && no === spacing,
+            'b-first': this.calcType === 'B' && no === 1,
+            'b-last': this.calcType === 'B' && no === spacing,
+            'c-first': this.calcType === 'C' && no === 1,
+            'c-last': this.calcType === 'C' && no === spacing
+          }
+            ">{{ no }}</div>
         </template>
 
-      </div>
-      (示意圖"非"正確比例)
-      <br>
-      <br>
-      <h2>循環計算示意圖 - 頭尾角材貼齊邊緣，其餘對角材中心位置</h2>
-      <div style="width:100%; height: 250px;" class="demoDiv" ref="demo">
-        <template v-for="(no, index) in squareNumber" :key="no">
-          <div v-if="no != squareNumber"
-            style="display: flex;align-items: center;justify-content: center;position: absolute;border: 1px solid black;height: 250px;"
-            :style='{
-              "left": ((demoCycleSize) * (no - 1)) + "px",
-              "width": (Math.round(demoCycleSize * 100) / 100) + "px"
-            }'>
-          </div>
-          <div v-if="index === 0"
-            style="display: flex;align-items: center;justify-content: center;position: absolute;height: 250px;" :style='{
-              "left": ((demoCycleSize) * (no - 1)) + "px",
-              "width": (Math.round(demoCycleSize * 100) / 100) + "px"
-            }'>
-            {{ Math.round(cycleSize * 100) / 100 }}
-          </div>
+        <!--TYPE D-->
+        <template v-else v-for="(no) in spacing">
+          <div class="d-block" :class="{
+            'd-first': no === 1,
+            'd-last': no === spacing
+          }
+            ">{{ no }}</div>
 
-          <div style="position: absolute; border-radius: 50%; width: 20px;height: 20px;color: white ;
-            background-color: blue;display: flex;align-items: center;justify-content: center;" :style='{
-              "left": ((demoCycleSize) * (no - 1) - 5) + "px"
-            }'>{{ no }}</div>
+            <div style="width: 3px;border-right: 2px dashed black;" v-if="no!==spacing"></div>
         </template>
-
       </div>
-      (示意圖"非"正確比例)
+      (示意圖"非"正確比例，虛線是劃線位置)
     </div>
 
   </v-container>
 </template>
 
 <script>
-//import HelloWorld from './components/HelloWorld.vue'
+
 
 export default {
   data() {
@@ -120,35 +113,95 @@ export default {
       isReady: false,
       demoWidth: -1,
       demoSquareWidth: 10,
+
+      totalWidthData: [
+        { title: '8尺(2440mm)', value: 2440 },
+        { title: '7尺(2135mm)', value: 2135 },
+        { title: '6尺(1830mm)', value: 1830 },
+        { title: '4尺(1220mm)', value: 1220 },
+        { title: '3尺(915mm)', value: 915 },
+        { title: '2尺(610mm)', value: 610 }],
+      calcType: "A",
+      calcTypes: [
+        { title: "有頭尾 ┃┃┃", value: "A", desc: "計算角材到角材之間的實內距離" },
+        { title: "無頭尾 ┆┃┆", value: "B", desc: "計算角材到角材之間的實內距離，頭尾端無角材" },
+        { title: "有頭無尾 ┃┃┆", value: "C", desc: "計算角材到角材之間的實內距離，尾端沒有角材" },
+        { title: "循環計算 ┃┃┃...", value: "D", desc: "計算板材連續拼接的固定距離(頭尾的間距會不同)" }]
     }
   },
   mounted() {
     this.isReady = true
     this.$nextTick(() => {
-      console.log("refs:", this.$refs.demo.offsetWidth)
+      //console.log("refs:", this.$refs.demo.offsetWidth)
       this.demoWidth = this.$refs.demo.offsetWidth
     })
 
     window.addEventListener("resize", () => {
-      console.log("refs:", this.$refs.demo.offsetWidth)
+      //console.log("refs:", this.$refs.demo.offsetWidth)
       this.demoWidth = this.$refs.demo.offsetWidth
     });
   },
   methods: {
-    doManual() {
-      console.log(this.isManual)
+
+    totalWidthIdKeydown(e) {
+      console.log(e.keyCode)
+      if ((e.keyCode >= 48 && e.keyCode <= 57) || [37, 39, 46, 8].includes(e.keyCode)) {
+        return
+      }
+      e.preventDefault()
     }
   },
   computed: {
-    spacingSize() {
-      return Math.round(((this.totalWidth - (this.realSquareWidth * this.squareNumber)) / (this.squareNumber - 1)) * 100) / 100
-    },
-    demoSpacingSize() {
-      return (((this.demoWidth - (this.demoSquareWidth * this.squareNumber)) / (this.squareNumber - 1)))
-    },
+    // 間隔數量
     spacing() {
-      return this.squareNumber - 1
+
+      let n = 0
+      switch (this.calcType) {
+        case "A":
+          n = this.squareNumber - 1
+          break;
+        case "B":
+          n = this.squareNumber + 1
+          break;
+        case "C":
+          n = this.squareNumber
+          break;
+        case "D":
+          n = this.squareNumber - 1
+          break;
+
+        default:
+          break;
+      }
+
+      return n//this.squareNumber - 1
     },
+    // 間隔距離
+    spacingSize() {
+
+      let n = 0
+      switch (this.calcType) {
+        case "A":
+          n = (this.totalWidth - this.realSquareTotal) / this.spacing
+          break;
+        case "B":
+          n = (this.totalWidth - this.realSquareTotal) / this.spacing
+          break;
+        case "C":
+          n = (this.totalWidth - this.realSquareTotal) / this.spacing
+          break;
+        case "D":
+          n = this.totalWidth / this.spacing
+          break;
+
+        default:
+          break;
+      }
+
+      return Math.round(n * 100) / 100;
+    },
+
+    // 角材總寬
     squareTotal() {
       if (this.isManual) {
         return this.squareWidth
@@ -156,21 +209,22 @@ export default {
         return this.squareNumber * this.squareWidth
       }
     },
-    realSquareWidth() {
+
+    // 實際角材總寬
+    realSquareTotal() {
       if (this.isManual) {
-        return this.squareWidth / this.squareNumber
-      } else {
         return this.squareWidth
+      } else {
+        return this.squareWidth * this.squareNumber
       }
 
-    },
-    cycleSize() {
-      return Math.round(this.totalWidth / (this.squareNumber - 1) * 100) / 100
     }
-    , demoCycleSize() {
-      return this.demoWidth / (this.squareNumber - 1)
+  },
+  watch: {
+    "totalWidth": function (v) {
+      console.log("[watch] totalWidth:", v)
+      console.log(typeof this.totalWidth)
     }
-
   }
 }
 
@@ -180,13 +234,79 @@ export default {
 <style scoped>
 .demoDiv {
   margin-top: 20px;
-  border: 1px solid rebeccapurple;
-  position: relative;
-  /* transform:scaleX(0.5);
-  transform:scaleY(0.5); */
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  display: flex;
+  background-color: burlywood;
+  width: 100%;
+  height: 150px;
 }
 
-.inputs>.v-input {
-  margin: 5px;
+
+
+.t-rules {
+  text-align: right;
+  margin: 5px 5px 5px 0;
+  font-size: 0.8em;
+  color: blue;
+}
+
+.block {
+  background-color: white;
+  flex: 1;
+  margin: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 2px dashed black;
+  border-right: 2px dashed black;
+}
+
+.d-block {
+  background-color: white;
+  flex: 1;
+  margin: 0 5px;
+  display: flex!important;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.a-first {
+  margin: 0 5px 0 10px;
+}
+
+.a-last {
+  margin: 0 10px 0 5px;
+}
+
+.b-first {
+  margin: 0 5px 0 0;
+  border-left: 1px solid rgb(211, 211, 211);
+}
+
+.b-last {
+  margin: 0 0 0 5px;
+  border-right: 1px solid rgb(211, 211, 211);
+}
+
+.c-first {
+  margin: 0 5px 0 10px;
+}
+
+.c-last {
+  margin: 0 0 0 5px;
+  border-right: 1px solid rgb(211, 211, 211);
+}
+
+.d-first {
+  margin: 0 5px 0 10px;
+}
+
+.d-last {
+  margin: 0 10px 0 5px;
 }
 </style>
