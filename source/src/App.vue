@@ -18,13 +18,13 @@
 
           <v-combobox label="板材總寬(mm)" density="compact" color="blue" clearable hide-details :items="totalWidthData"
             v-model.number="totalWidth" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
-          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this._totalWidth / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this._totalWidth / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
         </v-col>
       </v-row>
 
       <v-row>
         <v-col>
-          <v-text-field label="角材數量(包含頭尾)" color="blue" clearable type="number" v-model.number="squareNumber"
+          <v-text-field label="角材數量" color="blue" clearable type="number" v-model.number="squareNumber"
             hide-details density="compact"></v-text-field>
           <div style="margin-top: 10px;"></div>
         </v-col>
@@ -49,7 +49,7 @@
           <v-text-field label="角材總寬(mm)" type="number" v-model="squareTotal" readonly bg-color="#eeeeee" hide-details
             density="compact" color="red" ></v-text-field>
 
-          <div class="t-rules"> {{ (Math.round(this.squareTotal / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+          <div class="t-rules"> {{ (Math.round(this.squareTotal / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
         </v-col>
       </v-row>
 
@@ -60,7 +60,7 @@
           <v-text-field label="間距(mm)" type="number" v-model="spacingSize" readonly bg-color="#eeeeee" hide-details
             density="compact" color="red"></v-text-field>
 
-          <div class="t-rules"> {{ (Math.round(this.spacingSize / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
+          <div class="t-rules"> {{ (Math.round(this.spacingSize / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
         </v-col>
       </v-row>
     </v-sheet>
