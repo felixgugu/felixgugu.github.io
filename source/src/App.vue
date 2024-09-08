@@ -5,7 +5,7 @@
     <v-sheet style="border: 2px solid #cccccc;border-radius: 8px;padding: 10px;background-color: beige;">
       <v-row>
         <v-col>
-          <v-select label="計算方式" density="compact" clearable hide-details :items="calcTypes" v-model="calcType"
+          <v-select label="計算方式" density="compact" hide-details :items="calcTypes" v-model="calcType"
             color="blue"></v-select>
 
           <div class="t-rules" style="color:blue">{{ this.calcTypes.filter((v) => v.value === this.calcType)[0].desc }}
