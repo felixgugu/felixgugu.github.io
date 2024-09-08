@@ -1,0 +1,4 @@
+@use 'vuetify/settings' with (
+    $list-item-one-line-min-height: 24px,
+    $list-item-one-line-padding: 0 0,
+);

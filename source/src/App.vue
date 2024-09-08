@@ -22,14 +22,14 @@
         </v-col>
       </v-row>
 
-      <v-row class="manual-button" v-show="calcType!=='D'">
+      <v-row class="manual-button" v-show="calcType !== 'D'">
         <v-col>
           <v-checkbox label="角材自行加總(需要絕對精準時)" density="compact" v-model="isManual" color="green"
             hide-details></v-checkbox>
         </v-col>
       </v-row>
 
-      <v-row v-show="calcType!=='D'">
+      <v-row v-show="calcType !== 'D'">
         <v-col>
           <v-text-field v-if="isManual" :label="!isManual ? '角材寬度(mm)' : '角材總寬(mm)'" clearable type="number"
             :style="{ color: isManual ? 'green' : 'black' }" v-model.number="squareWidth" hide-details
@@ -98,13 +98,13 @@
 
         <!--TYPE D-->
         <template v-else v-for="(no) in spacing">
-          <div class="d-block" :class="{
+          <div class="type-d-block" :class="{
             'd-first': no === 1,
             'd-last': no === spacing
           }
             ">{{ no }}
 
-            <div v-if="no === 1" class="demoSize">{{ this.spacingSize }}</div>
+            <div v-if="no === 1" class="d-demoSize">{{ this.spacingSize }}</div>
           </div>
 
           <div style="width: 3px;border-right: 2px dashed red;" v-if="no !== spacing"></div>
@@ -118,12 +118,11 @@
 
 <script>
 
-
 export default {
   data() {
     return {
       totalWidth: 2440,
-      squareWidth: 27.5,
+      squareWidth: 27,
       squareNumber: 7,
       isManual: false,
       isReady: false,
@@ -276,7 +275,7 @@ export default {
 
 </script>
 
-<style>
+<style lang="scss">
 .demoDiv {
   margin-top: 20px;
   border-left: 2px solid black;
@@ -310,7 +309,7 @@ export default {
   border-right: 2px dashed red;
 }
 
-.d-block {
+.type-d-block {
   background-color: white;
   flex: 1;
   margin: 0 5px;
@@ -375,4 +374,15 @@ export default {
   width: 100%;
   text-align: center;
 }
+
+.d-demoSize {
+  position: absolute;
+  bottom: 10px;
+  left: -10px;
+  background-color: black;
+  color: white;
+  width: calc(100% + 18px);
+  text-align: center;
+}
+
 </style>
