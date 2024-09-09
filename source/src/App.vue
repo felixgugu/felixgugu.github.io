@@ -1,13 +1,11 @@
 <template>
-
-  <v-container fluid>
+  <v-container :max-width="600">
     <h2>角材間距計算機</h2>
-    <v-sheet style="border: 2px solid #cccccc;border-radius: 8px;padding: 10px;background-color: beige;">
+    <v-sheet style="border: 2px solid #cccccc;border-radius: 8px;padding: 14px 5px;background-color: beige;">
       <v-row>
         <v-col>
           <v-select label="計算方式" density="compact" hide-details :items="calcTypes" v-model="calcType"
             color="blue"></v-select>
-
           <div class="t-rules" style="color:blue">{{ this.calcTypes.filter((v) => v.value === this.calcType)[0].desc }}
           </div>
         </v-col>
@@ -18,7 +16,7 @@
 
           <v-combobox label="板材總寬(mm)" density="compact" color="blue" clearable hide-details :items="totalWidthData"
             v-model.number="totalWidth" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
-          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this._totalWidth / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
+          <div class="t-rules">表列為市售尺寸。換算後為 {{ (Math.round(this._totalWidth / 10 / 30.3 * 100) / 100) + ' 尺' }}</div>
         </v-col>
       </v-row>
 
@@ -37,9 +35,9 @@
           <v-combobox v-else label="角材寬度(mm)" density="compact" color="blue" clearable hide-details :items="squareTypes"
             v-model.number="squareWidth" :return-object="false" @keydown="totalWidthIdKeydown"></v-combobox>
 
-          <div v-if="isManual" class="t-rules"> {{ (Math.round(this._squareWidth / 10 / 3.03 * 1000) / 1000) + ' 寸' }}
+          <div v-if="isManual" class="t-rules"> {{ (Math.round(this._squareWidth / 10 / 3.03 * 100) / 100) + ' 寸' }}
           </div>
-          <div v-else class="t-rules">表列為市售尺寸。扣掉鋸路後剩 {{ (Math.round(this._squareWidth / 10 / 3.03 * 1000) / 1000) + ' 寸'
+          <div v-else class="t-rules">表列為市售尺寸。扣掉鋸路後剩 {{ (Math.round(this._squareWidth / 10 / 3.03 * 100) / 100) + ' 寸'
             }}</div>
         </v-col>
 
@@ -53,15 +51,14 @@
 
       <v-row>
         <v-col>
-          <v-text-field label="間隔數量" type="number" v-model="spacing" readonly bg-color="#eeeeee" hide-details
-            density="compact" base-color="blue"></v-text-field>
+          <v-text-field label="間隔數量" variant="solo" v-model="spacing" readonly bg-color="#48CCE6" hide-details
+            density="compact" base-color="#000000"></v-text-field>
         </v-col>
 
         <v-col>
-          <v-text-field label="角材總寬(mm)" type="number" v-model="squareTotal" readonly bg-color="#eeeeee" hide-details
-            density="compact" base-color="blue"></v-text-field>
-
-          <div class="t-rules"> {{ (Math.round(this.squareTotal / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
+          <v-text-field label="角材總寬" variant="solo" v-model="squareTotal" readonly bg-color="#48CCE6" hide-details
+            density="compact" base-color="#000000">
+          </v-text-field>
         </v-col>
       </v-row>
 
@@ -69,10 +66,8 @@
 
       <v-row>
         <v-col>
-          <v-text-field label="間距(mm)" type="number" v-model="spacingSize" readonly bg-color="#eeeeee" hide-details
-            density="compact" base-color="blue" class="result2"></v-text-field>
-
-          <div class="t-rules"> {{ (Math.round(this.spacingSize / 10 / 30.3 * 1000) / 1000) + ' 尺' }}</div>
+          <v-text-field label="間距" variant="solo" v-model="spacingSizeResult" readonly bg-color="#48CCE6" hide-details
+            density="compact" base-color="000000" class="result2" @click="isDefault = !isDefault"></v-text-field>
         </v-col>
       </v-row>
     </v-sheet>
@@ -129,6 +124,8 @@ export default {
       demoWidth: -1,
       demoSquareWidth: 10,
 
+      isDefault: true,
+
       //板材
       totalWidthData: [
         { title: '8尺(2440mm)', value: 2440 },
@@ -177,6 +174,16 @@ export default {
         return
       }
       e.preventDefault()
+    },
+    //公厘轉台尺
+    mm2tr(d, isDefault) {
+      let v = Math.abs(Math.round(d / 10 / 30.3 * 100)) / 100
+      console.log(v)
+      if (v < 1 || !isDefault) {
+        return Math.floor(v * 10 * 100) / 100 + ' 寸'
+      } else {
+        return v + ' 尺'
+      }
     }
   },
   computed: {
@@ -228,14 +235,28 @@ export default {
       return Math.round(n * 100) / 100;
     },
 
+    // 間距結果
+    spacingSizeResult() {
+      let r = this.spacingSize
+      let tr = this.mm2tr(r, this.isDefault)
+      return `${r}mm = ${tr}`
+
+    },
+
     // 角材總寬
     squareTotal() {
+      let r = 0
       if (this.isManual) {
-        return this._squareWidth
+        r = this._squareWidth
       } else {
-        return this._squareNumber * this._squareWidth
+        r = this._squareNumber * this._squareWidth
       }
+      let tr = this.mm2tr(r, false)
+
+      return `${r}mm = ${tr}`
     },
+
+
 
     // 實際角材總寬
     realSquareTotal() {
@@ -385,4 +406,7 @@ export default {
   text-align: center;
 }
 
+.v-col {
+  padding: 5px 12px !important;
+}
 </style>
